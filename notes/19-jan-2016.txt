@@ -1,0 +1,252 @@
+Informed Search
+=====
+When we're doing an uninformed search, we expand nodes based on
+distance from the start node.
+
+But ideally, if we had an oracle with some information on how far
+each node was from a solution, we'd like to expand based on distance
+*to* the goal. (d(n, ngoal))
+
+If we knew d(n, ngoal) exactly, we'd expand the nodes that lead us
+closer to the solution.
+
+But since we don't have this information, we should use some intuition
+about this distance; we call this intuition a heuristic h(n).
+
+e.g. travelling through Romania, and selecting nodes that are in a straight
+line closer to a target city as opposed to just traversing the entire graph
+in an uninformed way.
+
+    Reasonable heuristic in this circumstance =
+        Straight-line distance between two places.
+
+    It's not always right, but it's roughly in the same directly.
+
+e.g. eight-puzzle, two possible heuristics:
+    h1(n) = number of misplaced tiles.
+    h2(n) = total Manhattan distance (sum of distance by moves of each
+        tile from their proper place).
+
+    which is a better heuristic? Intuitively, h2(n) seems better because
+    it varies more across state space and its estimate is closer to true cost.
+
+Where do heuristics come from?
+----
+- Requires prior knowledge about the problem.
+- Exact solution to relaxed version of problem:
+    - Let's say a tile can be moved to any other tile. h1(n) gives exact
+        distance to goal.
+    - Let's say a tile can be moved to any adjacent tile. h2(n) gives exact
+        distance to goal.
+- Learning from prior experience.
+
+Methods of employing heuristics
+-----
+Best-First Search (Greedy Algorithm)
+Algorithm: Expand the most promising node according to just the heuristic
+
+Best-First is similar to Breadth-First. How similar depends on the
+goodness of the heuristic. If heuristic is always equal across all
+nodes, then best-first is same as BFS.
+
+Best-first is the converse of uniform cost search:
+- Uniform cost search considers cost-so-far.
+- Best-first search considers the cost-to-go.
+
+Properties of greedy search:
+    Worst case: Exponential time/space complexity(O(b^d))
+        where b = branching factor
+              d = solution depth
+    Given a good heuristic, it can help a lot! (O(bd))
+        - Same as DFS!
+    Completeness:
+        - Not always complete. Can get stuck in loops.
+        - Complete is finite spaces, if we check to avoid repeated states.
+    Not optimal! Can we fix this?
+
+Fixing greedy search:
+Best-first is too greedy. Does not take into account the cost so far..
+
+Solution?:
+    - Let g be the cost so far,
+    - h is a heuristic function (i.e. estimated cost to go)
+
+Heuristic search
+-----
+best-first search, greedy with respect to f=g+h...
+    - Think of g+h as estimate of cost of the current path.
+
+At every step, take node n from the front of the queue.
+Add to priority queue successors n' with priorities: f(n') = g(n') + h(n')
+Terminate when a goal state is popped from the queue.
+
+Note: Even if we've found a goal state, we keep expanding nodes if there
+are unexpanded nodes tht have lower cost than current path to goal.
+
+Is heuristic search optimal? No! Must put conditions on the choice of
+heuristic to guarantee optimality.
+
+Admissible heuristics
+
+Let h*(n) be the shortest path from n to any goal state.
+
+A heuristic h is admissible if h(n) <= h*(n), for all n
+(in other words, a heuristic function is said to be
+admissible if it never overestimates the cost of reaching the goal,
+i.e. the cost it estimates is not higher than the lowest possible
+cost from the current point in the path.)
+
+Examples of admissible heuristics:
+    - In navigation: Straight-line distance to goal
+    - 8-puzzle: h1 = number of misplaced tiles
+                h2 = sum of Manhattan distances for each tile to goal
+                position.
+
+Generally, by solving a relaxed version of the problem, we obtain
+an admissible heuristic. Possibly because the unreasonably simpler
+versions of problems enable far simpler solutions, and therefore
+the heuristic will generally admissible.
+
+Admissible heuristics must be optimistic!
+They must be optimistic otherwise it's possible to miss an optimal solution.
+
+A* search
+-----
+Algorithm: Heuristic search with an admissible heuristic.
+- Let g be cost of path so far
+- Let h be an admissible heuristic function
+Perform greedy search wrt f = g + h.
+Traits of heuristic functions:
+    - Consistency
+        - Admissible heuristic h is consistent or monotone if
+            for each state s and successor s' we have:
+                h(s) <= c(s,s') + h(s')
+            Comes with optimism and can be thought of h getting
+            more precise (or more realistic?) as it gets closer
+            to the goal.
+    look up: monotone, triangle inequality, metrics
+            Consistency is slightly stronger property than
+            admissibility. (i can see that!)
+
+Assuming h is consistent, and all costs are positive.
+Thus, f cannot decrease along any path, and a node cannot
+be re-expanded in this example (???).
+
+If a solution exists, it must have bounded cost.
+Therefore, A* will have to find it. Thus A* search is complete.
+
+Fix some inconsistent heuristics:
+    Make small change to A*; instead of f(s') = g(s') + h(s'),
+        use: f(s') = max(g(s') + h(s'), f(s))
+    With this change, f cannot decrease along any path, and
+    the previous arguments apply.
+
+Is A* optimal:
+Proof by contradiction:
+    Check lecture 3, page 13. Proof is very apt.
+    Gist is that A* will select n for expansion before a suboptimal
+    one because of admissibility.
+
+Dominance:
+    if h2(n) > h1(n), for all n (and both are admissible), then
+    h2 dominates h1.
+        The intuition is that h2 is more informative than h1.
+    Eight puzzle example is super compelling:
+        IDS -> 3,473,941 nodes expanded.
+        A*(h1) -> 539 nodes
+        A*(h2) -> 113 nodes
+        where the solution depth is 14.
+        if solution depth is 24:
+        IDS -> too many
+        A*(h1) -> 39,135 nodes
+        A*(h2) -> 1,641 nodes
+        Dominant heuristic is far superior!
+
+Properties of A*:
+    - Complete!
+    - Optimal!
+    - Exponential worst case time and space complexity:
+        - With perfect heuristic, complexity is O(bd), because
+            we only expand nodes on optimal path.
+        - With decent heuristic, complexity is sub-exponential.
+    - Optimally efficient:
+        with given h, no other search algorithm will be able to
+        expand fewer nodes.
+
+Iterative Deepening A*:
+    Same trick as IDS to avoid memory issues.
+
+    Basically DFS but using the f-value to decide in which order
+    to consider descendents of node.
+
+    Use f-value limit instead of a depth limit.
+
+    IDA* has same properties as A* but uses less memory.
+
+    But to avoid always expanding new nodes, old ones can be remembered
+    if memory permits (technique is called SMA*)
+
+Real-time search:
+    Move before thinking; instead of calculating entire path to goal,
+    do a bit of search then move in immediate 'best path'.
+
+    Issue: Avoiding cycles if not enough memory to remember past states.
+
+RTA* (Real-time A*)
+-----
+When should algorithm backtrack to previous state s?
+Intuition: When cost to backtrack and solving problem from there
+    is cheaper than continuing on current path.
+
+Korf's solution: do A* but with g function equal to cost of current state,
+    rather than from the start.
+    - This simulates physically going back to the previous state.
+
+Deciding best direction:
+    Bounding search:
+        Look at all nodes on frontier, but then move one step in
+        direction of node with lowest f value.
+    Pruning:
+        Maintain variable 'a' that has lowest f-value of any node in
+        current search horizon.
+
+        Node with higher cost higher than 'a' will never get expanded.
+        (That branch will never be explored because it is almost
+        guaranteed to not contain an optimal solution).
+
+        If node with lower cost is discovered, then 'a' is updated.
+
+        Known as alpha-pruning, and allows search to proceed deeper
+        into more relevant branches.
+
+        Same idea used in advesarial search for game playing.
+
+Changing search problem:
+    Instead of choosing individual operators, can choose what subgoal
+    to achieve next, then solve subgoal, pick next one, etc.
+
+    Solutions to subgoals can often be reused! (e.g. Rubik's cube patterns)
+
+Abstraction + Decomposition
+-----
+Decomposition: Breaking large problems to smaller parts.
+
+Macro-action is sequence of actions from original problem
+    - e.g. making a T-shape on Rubik's Cube
+
+Abstraction refers to methods that ignore information in order
+to accelerate computation.
+    - Rubik's cube -> Focus on certain aspects and ignoroe rest of tiles.
+    - Construct a compact representation of the whole problem, with 
+        many 'real' states mapped to a single 'abstract' state.
+
+Decomp and Abstraction are often applied together.
+
+By using decomp, we might give up optimality. So we only
+apply this to problems that we can't solve otherwise.
+
+Solutions to subgoals can be cached so that they can be accessed and used
+quickly.
+
+But when we choose subgoals we have to be careful that the overall
+problem still has a solutions.

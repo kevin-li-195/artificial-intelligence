@@ -1,0 +1,218 @@
+Requires basic multi-variate calculus
+
+Introduction to Artificial Intelligence
+=====
+
+4 facets by which we can classify whether a machine exhibits artificial intelligence.
+
+    1. Acting humanly.
+    2. Thinking humanly.
+    3. Acting rationally.
+    4. Thinking rationally.
+
+Acting humanly
+-----
+Turing test was proposed as a method of testing whether a machine
+was capable of acting humanly. Involves a machine answering written questions
+in a "grey box" and having the interrogator determining whether the answers
+came from a machine or a human.
+
+In order to pass a Turing test, a machine should:
+
+    a) Possess natural language processing to understand and compose sentences.
+    b) Knowledge representation to store what it knows or hears.
+    c) Automated reasoning to draw conclusions based on what it knows.
+    d) Machine learning to adapt to new situations and to detect patterns.
+
+Total Turing test involves more elements that simulate "acting humanly":
+    
+    a) Computer vision so that the computer can understand what it sees.
+    b) "Hatch" through which objects can be passed for the computer to analyze.
+
+OTHER FACETS TO BE CONTINUED.
+
+Search in AI
+-----
+Primary topic studied in AI.
+
+Central component in AI systems:
+    - Theorem proving
+    - Game playing
+    - Automated scheduling
+    - Robot navigation
+
+Generally:
+    Domain-specific problem representation + General solution algorithm = Problem solution
+
+Defining a search problem:
+
+    State space S : all possible configurations of the domain.
+    Initial state s0 (element of S) : Starting configuration
+    Goal state(s) G (subset of S) : the set of end states
+    Operators A : the actions available
+        - often defined in terms of mapping from state to successor state.
+    Path: a sequence of states and operators
+    Path cost c: a number associated with any path
+    Solution of search problem: a path from s0 to sg (element of G)
+    Optimal solution: a solution with minimum path cost.
+
+    e.g. Robot path planning:
+        States: Position, velocity, map, obstacles.
+        Goals: Target position (maybe without crashing).
+        Operators: Small steps in particular directions.
+        Path cost: Length of path, energy consumption, time to goal, crash times.
+
+        reduction of the problem: Metric path planning (discretize!)
+
+        State: Grid cells.
+        Goal: A target grid cell.
+        Operators: Step into an adjacent tile (cardinal directions)
+        Path cost: Number of grid cells visited (can also have time).
+
+Assumptions for following lectures:
+
+    Environments will be static, not dynamic.
+    Environments will be observable, not unobservable.
+    Environments will be deterministic, not stochastic.
+    States will be discrete, not continuous.
+
+The general search problem does not make these assumptions,
+but the problems we'll encounter will.
+
+Representing search - Graphs and Trees
+-----
+
+Visualize the state space in terms of a *graph*:
+    Vertices correspond to states, edges correspond to operators.
+
+We search for a solution by building a search tree
+and traversing it to discover a goal state.
+
+Note: Search tree nodes are *NOT* the same as graph nodes.
+
+Defining a search tree
+-----
+
+- Each node contains a state id (from the set of states, or states in the graph).
+- Node also contains additional information:
+    - The parent state and the operator used to generate it. (allows backtracking and returning the path)
+    - Cost of the path so far (easy comparison of path cost)
+    - Depth of the node
+
+Expanding a search tree node:
+    - Applying all legal operators to the state.
+    - Generating nodes to all the neighbouring successor states.
+
+Need to keep track of the nodes to be expanded. Joelle implements this with a queue/stack.
+
+Uninformed (blind) search
+-----
+If the state is not a goal, you cannot tell how close to the goal it might be.
+Thus, all you can do is move systematically between states until you stumble on a goal.
+    e.g. BFS or DFS.
+
+BFS: Revisiting states
+-----
+What is we revisit a state that was already expanded or in the queue?
+For example, tree nodes could converge (i.e. multiple ways of reaching the same state).
+
+Solutions:
+    Maintaining a closed list to store every expanded node.
+        - More efficient on problems with many repeated states.
+        - Worst case time ans space requirements are O(S) (where S is number of states)
+
+    In some cases, allowing states to be re-expanded could produce a better solution:
+        - New path to node results in lower path cost
+        - Large domains, may not be able to store all states, so closed list may not work.
+
+DFS
+-----
+"Direction" of DFS is a question of how operators are ordered when constructing the search tree.
+
+Properties of search algorithms
+-----
+Completeness: Are we assured to find a solution (assuming one exists)?
+Optimality: How good is the solution?
+Space complexity: Storage required.
+Time complexity: Number of operations (could be path cost, depending on implementation of path cost.)
+
+Search complexity
+-----
+Evaluated with two characteristics:
+    - Branching factor of the state space ("b"): how many operators can be applied at any time?
+    - Solution depth ("d"): how short is the path from initial state the goal state?
+
+Analyzing BFS
+-----
+Good news:
+    - Complete. (if solution exists)
+    - Paths to different goals can be explored simultaneously.
+    - Guanranted to find shallowest path if unit cost per step.
+    Will not necessarily find optimal solution if cost per step is non-uniform.
+
+Bad news:
+    - Exponential time complexity O(b^d). (This is the same for all uninformed search algorithms)
+    - Exponential space complexity O(b^d). (Apparently not good. Because all paths must always be kept in mem.)
+
+    Uniform Cost Search
+    -----
+    Goal: Fix BFS to ensure an optimal path with general step costs.
+
+    Important distinction:
+        - Unit cost = Problem where each action has the same cost.
+        - General cost= Actions can be different costs.
+
+    Can be implemented with a priority queue prioritizing taking cheaper steps in BFS.
+        (take cheapest step each time out of all potential steps. Not strictly BFS, but cheaper.)
+
+Analyzing DFS
+-----
+Good news:
+    Linear space complexity O(bd):
+        This is because after searching down one path, the entire path can be discarded.
+    Easy to implement recursively.
+    More efficient than BFS if there are many paths leading to solution.
+
+Bad news:
+    Exponential time complexity (no surprise there)
+    Not optimal.
+    DFS may not complete because of infinite tree depths.
+
+    Solution? Depth-limited search (DLS)
+        Terminate path if goal state is found, or if maximum depth allowed is reached, or if reached end of path.
+        This always terminates!
+        But it's still not complete because solution may lie beyond the maximum depth.
+            Solution: Iterative deepening search (IDS)
+                Do DLS, but with increasing depth.
+                Expands nodes multiple times, but is now a complete algorithm.
+
+                Analysis of IDS:
+                    Complete! (like BFS)
+                    Linear memory requirements (like DFS)
+                    Classical time-space tradeoff.
+
+Which search methods to use?
+-----
+
+Ask these questions:
+    Need to find optimal solution?
+        BFS, DFS, IDS if unit cost.
+        Uniform cost search if general cost.
+    State space is large?
+        DFS if known max path length.
+        IDS otherwise.
+    Limited mem?
+        DFS, IDS
+    Quickly find best solution given a resource budge?
+        DLS if unit cost.
+        Uniform cost search if general cost.
+
+Summary of Uninformed Search
+-----
+Assumes no knowledge about problem.
+
+Main difference methods is ordering of state consideration.
+
+Very general. Very expensive. Some algorithms are complete.
+
+**All have exponential worst case complexity.**

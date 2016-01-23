@@ -1,0 +1,165 @@
+Search for Optimization Problems
+=====
+Previous assumptions made about discrete state space and discrete operator effects.
+But some spaces are more complex, large-dimensional or even continuous spaces.
+
+Some iterative improvement algorithms:
+    - Hill climbing
+    - Simulated annealing
+
+As opposed to constructive solutions (building a solution from ground up)
+we search around the solution space for a good solution.
+
+Optimization problems
+-----
+Typically characterized by:
+    - Large (continuous, combinatorial) state space X
+    - Searching all possible solutions is infeasible.
+    - A non-uniform cost function, which we want to optimize.
+
+How do we search for a good solution? Perhaps some heuristic
+for the cost func, or we actually run that solution.
+
+One good thing for a cost function is convexity, where there is
+a single clear optimal point. But if we have a non-convex function
+it might not be as easy to find *the* best solution. (e.g. local maximum)
+
+So generally we're happy with a *good* solution (perhaps satisfying constraints).
+
+Mathematical optimization, not probability!
+
+Example: Travelling salesman problem.
+    Problem?
+        - NP complete
+        - Solution can be easily verified
+        - Large state space and solution space
+    Very hard to find best solution, but easy to find some solution.
+    Satisfied with a good enough solution.
+
+Example: Robot arm control:
+    Objective: Find a configuration of joints such as to reach the goal.
+
+Generally, problem is defined by a set of states/configurations and an evaluation function.
+    - The state space is too big to enumerate all states, or...
+    - The evaluation function is too expensive to computer for all states.
+
+Types of Search for Optimization Problems:
+    - Constructive methods: Start from scratch and build up a solution
+        (what we've looked at in previous lectures)
+    - Iterative improvement/repair methods: Start with a suboptimal or broken solution and improve/fix it.
+        - e.g. in TSP, swap cities to improve cost.
+In both types of search, the search is local (we make a smoothness assumption for the eval func).
+    - Consider one solution, apply modification to generate the next one.
+    - Only consider a solution at a time, don't memorize previous solutions explored.
+
+Generic local search
+-----
+1. Start from an initial configuration X0
+2. Repeat until satisfied:
+    - Generate set of neighbours of Xi
+    - Select one of the neightbours, Xi+1
+    - Selected neighbour becomes current configuration
+
+Questions:
+    - How do we choose the set of neighbours?
+    - How do we select one of the neighbours?
+    - Defining the set of neighbours is a design choice (like choosing some heuristic)
+    and has a large impact on performance.
+
+Case 1: Robot arm
+    Start with random position
+    Move to adjacent position
+    Terminate when goal is reached
+
+Case 2: TSP
+    Start with a random tour
+    Swap cities to obtain a new tour
+    Stop when constraints are met
+
+Hill-climbing (aka greedy local search, gradient ascent/descent)
+-----
+1. Start from initial configuration Xo with eval func value E(X0)
+2. Repeat:
+    - Generate set of neighbours of Xi and their E(Xi) values
+    - let Emax = maxi(Ei) be value of best successor
+          i* = argmaxiE(Xi) be index of best successor
+    - if Emax <= E, return X
+    else let X <- Xi*, and E = Emax
+Basically picking the next best solution
+
+Properties of hill-climbing:
+    - Variant of best-first-search. Popular algorithm.
+    - Trivial to program
+    - Requires no memory of where we've been (no backtracking)
+    - Can handle very large problems
+
+Important to have a good set of neighbours in hill-climbing.
+    - Small neighbourhood: fewer neighbours to eval,
+        but potentially worse solutions
+    - Big neighbourhood: more computation, but maybe fewer local
+        optima, so better final result.
+Must make distinction between algorithms that are globally vs locally optimal.
+
+Example: TSP swapping two nodes.
+Pick two edges, and change their connected nodes.
+O(n^2) (because n choose 2 possibilities)
+
+Or pick three edges (wider neighbourhood -> O(n^3))
+
+Problems with hill-climbing
+-----
+Stuck in local maximum or plateau.
+Plateau -> Large area where evaluation function is constant.
+
+Improvements:
+    - When stuck in plateau or local maximum, use random re-starts.
+    - Instead of picking best move, pick any move that produces an improvement.
+        (we call this randomized hill climbing)
+    But sometimes we need to pick apparently worse moves to eventually reach better states.
+
+Simulated annealing
+-----
+Similar to hill climbing, but:
+    - allows some "bad moves" in the hope of escaping local maxima
+    - decrease size and frequency of "bad moves" over time
+
+    Start from initial config, pick random neighbour of X.
+    Similarly to hill climbing, pick it if it's the best out of all neighbours 
+        (or if randomized hill climbing, pick it if it's better)
+    If it's worse, then maybe we should pick it with probability p if we're
+    using simulated annealing.
+
+    What value to use for p?
+        - A given fixed value (possibility that algorithm will not terminate if
+            there is no assured termination condition)
+        - Value that decays to 0 over time
+        - Value that decays to 0, and gives similar chance to "similarly bad" moves.
+        - Value that depends on how much worse the bad move is.
+
+    And now that we have the possibility of making bad moves, it's possible to get stuck in
+    a loop if we keep backtracking over the same hill. But realistically, it's *very* unlikely
+    for this to occur, especially in high dimensions.
+
+Boltzmann Distribution (for picking probability p)
+-----
+Physics!
+
+If new value Ei is better than old value E, move to Xi.
+
+If new value is worse (Ei < E) then move to neighbouring solution with probability:
+    p = e^{-(E-Ei)/T}
+
+T>0 is a parameter called the temperature, which typically starts high, then decreases over time towards 0.
+If T is close to 0, then the probability of moving to a worse position is almost 0.
+
+When T is high, the probability of moving to a worse position is high.
+
+We can gradually decrease T by multiplying by constant 0<\alpha<1
+
+T high -> Exploratory phase
+    - Bad moves have high chance of being picked.
+T low -> Exploitation phase
+    - Focused on climbing the local hills.
+
+Interesting: If we decrease T slowly enough, simulated annealing is guaranteed to reach the optimal solution.
+    Might require infinite number of moves because we have to decrease T reaaaaally slowly.

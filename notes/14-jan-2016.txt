@@ -1,0 +1,41 @@
+Over the course of examining search, we'll make more and more complex assumptions about the search.
+
+Started with uninformed search (made practically no assumptions, just manipulated states and operations).
+
+Let's define intelligence.
+
+What is biological intelligence?
+-----
+Sensory processing:
+    - Visual cortex
+    - Auditory cortex
+    - Somatosensory cortex
+Motor cortex
+Cognitive functions:
+    Memory formation, recall
+    etc.
+
+Mainly, a mix of general and special purpose algorithms:
+    General purpose:
+        Memory formation, updating, retrieval.
+        Learning new tasks
+    Special purpose:
+        Recognizing visual patterns,
+        Recognizing sounds,
+        Learning language.
+Integrated seamlessly!
+
+Modern notion of a machine is not necessary to implement an AI.
+
+How to implement "acting rationally"?
+-----
+Doing what is expected to maximize goal achievement, given the available information and available resources.
+    Does not necessarily require thinking (e.g. blinking, recoiling from a hot stove)
+    But in many cases, thinking serves rational behaviour.
+
+**"Acting rationally" is the flavour of AI that we'll focus on.**
+
+Rational agents
+-----
+The course is about designing rational agents.
+An agent is an entity that perceives and acts.
