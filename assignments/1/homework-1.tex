@@ -7,9 +7,36 @@
 \newpage
 
 \section{Question 1 - Search}
+\begin{enumerate}
+\item
     \begin{description}
-        \item[Breadth First Search]
-            
+        \item[Breadth First Search] Gare du Nord, Rogier, Yser,
+            Ribaucourt, Simonis, Belgica, Pannenhuis, Bockstael,
+            Stuybenbergh, Houba-Brugmann, Heysel, Roi Baudouin
+
+        \item[Uniform Cost Search] Same as BFS given that all
+            operators have unit costs. (Gare du Nord, Rogier, Yser, Ribaucourt, Simonis, Belgica, Pannenhuis, Bockstael, Stuybenbergh, Houba-Brugmann, Heysel, Roi Baudouin)
+
+        \item[Depth First Search] Gare du Nord, Rogier, Botanique, Madou, Arts-Loi, Trone, Porte de Namur, Louise, Hotel des Monnaies, Porte de Hal, Gare du Midi, Clemenceau, Delacroix, Gare de l'Ouest, Beekkant, Osseghem, Simonis, Belgica, Pannenhuis, Bockstael, Stuyvenbergh, Houba-Brugmann, Heysel, Roi Baudouin
+
+        \item[Iterative Depth Search] Gare du Nord, Rogier, Yser, Ribaucourt, Simonis, Belgica, Pannenhuis, Bockstael, Stuyvenbergh, Houba-Brugmann, Heysel, Roi Baudouin (implemented using limited depth search and increasing the maximum depth if a solution is not returned).
     \end{description}
 
+\item
+    \begin{description}
+        \item[BFS] Same as previous answer as BFS does not consider
+            operator costs. (Gare du Nord, Rogier, Yser, Ribaucourt, Simonis, Belgica, Pannenhuis, Bockstael, Stuybenbergh, Houba-Brugmann, Heysel, Roi Baudouin)
+        \item[UCS] The Python program I wrote to do this incorrectly
+            returned a longer path than BFS, but this is
+            due to how costs are sorted in the priority queue
+            I chose to use. When it considered breaking ties
+            between operators of the same cost, it chose via
+            the clockwise order instead of a FIFO order
+            like that of a BFS implemented with a queue.
+            \par
+            The correct answer should be the same path as BFS,
+            because the path that should be taken would be along
+            line 6, towards to left and then promptly up to
+            Roi Baudouin.
+    \end{description}
 \end{document}
