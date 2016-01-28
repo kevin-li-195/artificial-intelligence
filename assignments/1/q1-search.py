@@ -1,11 +1,6 @@
 from collections import deque
 import json
-
-class NoNodeFoundError(Exception):
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return(repr(self.value))
+import Queue
 
 # Returns solution path
 # from start_node to end_node in list form.
@@ -20,7 +15,7 @@ def bfs(next_node, end_node):
         path = q.popleft()
         last_node = path[-1]
 
-        for neighbour in tree[last_node]:
+        for neighbour, line in tree[last_node]:
             if neighbour not in used:
                 new_path = list(path)
                 new_path.append(neighbour)
@@ -30,23 +25,34 @@ def bfs(next_node, end_node):
                 q.append(new_path)
     return(False)
     
-def recursive_dfs(next_node, end_node, used=[]):
-    new_used = list(used)
-    new_used.append(next_node)
-    if next_node == end_node:
-        return([end_node])
-    elif all(p in new_used for p in tree[next_node]):
-        raise NoNodeFoundError(next_node)
-    else:
-        for p in tree[next_node]:
-            if p not in new_used:
-                try:
-                    return([next_node] + dfs(p, end_node, used=new_used))
-                except NoNodeFoundError as e:
-                    print("No more neighbours at: " + str(e))
-                    continue
-                except TypeError:
-                    continue
+# Check if this actually works
+# Right now check if the nodes getting put in
+# are strings or node tuples.
+def ucs(next_node, end_node):
+    used = []
+    used.append(next_node)
+    
+    q = Queue.Queue()
+    q = Queue.PriorityQueue(q)
+
+    for neighbour, cost in tree[next_node]:
+        if (neighbour, cost) not in used:
+            q.put((cost, ([next_node], neighbour)))
+
+    while not q.empty():
+        b  = q.get()
+        succ_cost = b[0]
+        prev_path, succ_node = b[1]
+        used.append((succ_node, succ_cost))
+
+        if succ_node == end_node:
+            return(prev_path + [end_node])
+
+        for (neighbour, cost) in tree[succ_node]:
+            if (neighbour, cost) not in used:
+                q.put((cost, (prev_path+[succ_node], neighbour)))
+
+    return(False)
 
 def iterative_dfs(next_node, end_node):
     used = []
@@ -55,7 +61,7 @@ def iterative_dfs(next_node, end_node):
     while len(stack) > 0:
         path = stack.pop()
         last_elem = path[-1]
-        for new_node in reversed(tree[last_elem]):
+        for new_node, line in reversed(tree[last_elem]):
             if new_node in used:
                 continue
             new_path = list(path)
@@ -64,15 +70,33 @@ def iterative_dfs(next_node, end_node):
             if new_node == end_node:
                 return(new_path)
             stack.append(new_path)
+    return([])
 
-def ids(next_node, end_node):
-    for a in range(0,900):
-        b = dfs(next_node, end_node)
-        print("IDS Result: " + str(b))
-    #if a:
-    #    return(a)
-    #else:
-    #    return(ids(next_node, end_node, max_depth=max_depth+1))
+def dls(next_node, end_node, max_depth):
+    used = []
+    used.append(next_node)
+    stack = deque([[next_node]])
+    while len(stack) > 0:
+        path = stack.pop()
+        last_elem = path[-1]
+        if len(path) <= max_depth+1:
+            for new_node, line in reversed(tree[last_elem]):
+                if new_node in used:
+                    continue
+                new_path = list(path)
+                used.append(new_node)
+                new_path.append(new_node)
+                if new_node == end_node:
+                    return(new_path)
+                stack.append(new_path)
+    return([])
+
+def ids(next_node, end_node, depth=1):
+    a = dls(next_node, end_node, depth)
+    if a:
+        return(a)
+    else:
+        return(ids(next_node, end_node, depth=depth+1))
 
 if __name__ == "__main__":
     # First we construct the tree, implemented with a Python dictionary.
@@ -86,17 +110,21 @@ if __name__ == "__main__":
     for station in stations:
         tree[station["name"]] = []
         for n in station["neighbours"]:
-            if n["name"] not in tree[station["name"]]:
-                tree[station["name"]].append(n["name"])
+            if any(c == n["line"] for c in [1, 2, 3]):
+                cost = 2
+            else:
+                cost = 1
+            tree[station["name"]].append((n["name"],cost))
 
     start_node = "Gare du Nord"
     end_node = "Roi Baudouin"
 
     # Now we apply our functions.
     bfs_result = bfs(start_node, end_node)
+    ucs_result = ucs(start_node, end_node)
     dfs_result = iterative_dfs(start_node, end_node)
-    #ids_result = ids(start_node, end_node)
-    print("BFS: " + ", ".join(bfs_result))
-    print("UCS: " + ", ".join(bfs_result))
-    print("DFS: " + ", ".join(dfs_result))
-    #print("Result: " + str(ids_result))
+    ids_result = ids(start_node, end_node)
+    print("BFS: " + ", ".join(bfs_result) + "\n")
+    print("UCS: " + ", ".join(ucs_result) + "\n")
+    print("DFS: " + ", ".join(dfs_result) + "\n")
+    print("IDS: " + ", ".join(ids_result) + "\n")
