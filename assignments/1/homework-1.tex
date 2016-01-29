@@ -1,5 +1,8 @@
 \documentclass{article}
+\usepackage{amsmath}
+\usepackage{longtable}
 \usepackage{csvsimple}
+\usepackage{graphicx}
 
 \title{COMP 424 - Artificial Intelligence - Homework \#1}
 \author{Kevin Li - 260565522}
@@ -17,7 +20,8 @@
             Stuybenbergh, Houba-Brugmann, Heysel, Roi Baudouin
 
         \item[Uniform Cost Search] Same as BFS given that all
-            operators have unit costs. (Gare du Nord, Rogier, Yser, Ribaucourt, Simonis, Belgica, Pannenhuis, Bockstael, Stuybenbergh, Houba-Brugmann, Heysel, Roi Baudouin)
+            operators have unit costs.
+            (Gare du Nord, Rogier, Yser, Ribaucourt, Simonis, Belgica, Pannenhuis, Bockstael, Stuybenbergh, Houba-Brugmann, Heysel, Roi Baudouin)
 
         \item[Depth First Search] Gare du Nord, Rogier, Botanique, Madou, Arts-Loi, Trone, Porte de Namur, Louise, Hotel des Monnaies, Porte de Hal, Gare du Midi, Clemenceau, Delacroix, Gare de l'Ouest, Beekkant, Osseghem, Simonis, Belgica, Pannenhuis, Bockstael, Stuyvenbergh, Houba-Brugmann, Heysel, Roi Baudouin
 
@@ -76,5 +80,84 @@
 \end{description}
 
 \section{Question 3 - Optimization}
+\begin{enumerate}
+    \item See appendix for table and chart of hill climbing results.
+    \item See appendix for table and chart of simulated annealing results.
+        \par
+        The global maximum was near 1.65, so starting from lower numbers (1 to 4) is a good strategy.
+        0 is a poor starting point as negative x-values are outside the domain of the evaluation function.
+        Additionally, smaller increments prove to be better than larger increments for reaching maxima.
+        \par
+        Interestingly, with hill climbing we were guaranteed to obtain the global maximum for starting points
+        less than 4, while with simulated annealing it was possible to escape local maxima and
+        reach the global maximum near 1.65.
+        \par
+        However, the simulated annealing sometimes escaped the global maximum
+        when the starting point was less than 4.
+\end{enumerate}
+
+\section{Question 4 - Constraint satisfaction}
+\begin{itemize}
+    \item
+        Variables = X = \{CP = Computer installation, CD = code download, S = sensor installation, W = wiring\}
+        \par
+        \begin{gather*}
+            \mbox{Domain } = D = \{0, 5, 10, 15\}
+        \end{gather*}
+        \begin{gather*}
+            \mbox{Constraints } = C = \{CP + 10 \leq CD, S + 5 \leq W, (CP + 10 \leq W \mbox{ or } W + 10 \leq CP)\}
+        \end{gather*}
+\end{itemize}
+\begin{figure}
+    \centering
+    \caption{Constraint Graph}
+    \includegraphics[keepaspectratio=true,scale=0.75]{constraint-graph}
+\end{figure}
+Below is the search tree with backtracking, without forward checking.
+\begin{gather*}
+    D_{CP} = \{0, 5, 10, 15\}, D_{CD} = \{0, 5, 10, 15\}, D_{S} = \{0, 5, 10, 15\}, D_{W} = \{0, 5, 10, 15\} \\
+    CP = 0 \\
+    D_{CP} = \{0, 5, 10, 15\}, D_{CD} = \{10, 15\}, D_{S} = \{0, 5, 10, 15\}, D_{W} = \{10, 15\} \\
+    CP = 0, CD = 10 \\
+    D_{CP} = \{0\}, D_{CD} = \{10, 15\}, D_{S} = \{0, 5, 10, 15\}, D_{W} = \{10, 15\} \\
+    CP = 0, CD = 10, S = 0 \\
+    D_{CP} = \{0\}, D_{CD} = \{10, 15\}, D_{S} = \{0\}, D_{W} = \{10, 15\} \\
+    CP = 0, CD = 10, S = 0, W = 10
+\end{gather*}
+Finally the search tree below has backtracking and forward checking.
+\begin{gather*}
+    D_{CP} = \{0, 5, 10, 15\}, D_{CD} = \{0, 5, 10, 15\}, D_{S} = \{0, 5, 10, 15\}, D_{W} = \{0, 5, 10, 15\} \\
+    CP = 0 \\
+    D_{CP} = \{0, 5, 10, 15\}, D_{CD} = \{10, 15\}, D_{S} = \{0, 5, 10, 15\}, D_{W} = \{10, 15\} \\
+    CP = 0, CD = 10 \\
+    D_{CP} = \{0\}, D_{CD} = \{10, 15\}, D_{S} = \{0, 5, 10, 15\}, D_{W} = \{10, 15\} \\
+    CP = 0, CD = 10, S = 0 \\
+    D_{CP} = \{0\}, D_{CD} = \{10, 15\}, D_{S} = \{0\}, D_{W} = \{10, 15\} \\
+    CP = 0, CD = 10, S = 0, W = 10
+\end{gather*}
+The search tree is identical because the order in which variables are assigned happened to be quite convenient.
+
+\section{Appendix}
+\begin{figure}[h]
+\centering
+\caption{Hill Climbing Figure}
+\includegraphics[keepaspectratio=true, scale=0.75]{hill-climbing}
+\end{figure}
+\par
+\par
+\begin{figure}[h]
+\centering
+\caption{Simulated Annealing Figure}
+\includegraphics[keepaspectratio=true, scale=0.75]{simulated-annealing}
+\end{figure}
+\par
+\par
+\subsection{Hill Climbing Table}
+X position, height, depth of search
+\csvautolongtable{hillclimbing.csv}
+
+\subsection{Simulated Annealing Table}
+X position, height, depth of search
+\csvautolongtable{simulatedannealing.csv}
 
 \end{document}
