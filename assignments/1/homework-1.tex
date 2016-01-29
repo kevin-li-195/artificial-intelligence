@@ -1,4 +1,6 @@
 \documentclass{article}
+\usepackage{csvsimple}
+
 \title{COMP 424 - Artificial Intelligence - Homework \#1}
 \author{Kevin Li - 260565522}
 \date{Jan 21, 2016}
@@ -8,7 +10,7 @@
 
 \section{Question 1 - Search}
 \begin{enumerate}
-\item
+\item % Part 1a
     \begin{description}
         \item[Breadth First Search] Gare du Nord, Rogier, Yser,
             Ribaucourt, Simonis, Belgica, Pannenhuis, Bockstael,
@@ -22,7 +24,7 @@
         \item[Iterative Depth Search] Gare du Nord, Rogier, Yser, Ribaucourt, Simonis, Belgica, Pannenhuis, Bockstael, Stuyvenbergh, Houba-Brugmann, Heysel, Roi Baudouin (implemented using limited depth search and increasing the maximum depth if a solution is not returned).
     \end{description}
 
-\item
+\item % Part 1b
     \begin{description}
         \item[BFS] Same as previous answer as BFS does not consider
             operator costs. (Gare du Nord, Rogier, Yser, Ribaucourt, Simonis, Belgica, Pannenhuis, Bockstael, Stuybenbergh, Houba-Brugmann, Heysel, Roi Baudouin)
@@ -38,5 +40,41 @@
             because the path that should be taken would be along
             line 6, towards to left and then promptly up to
             Roi Baudouin.
+        \item[DFS] Same as previous DFS answer because DFS also does not consider
+            operator costs.
+        \item[IDS] Same as previous IDS answer because IDS does not consider operator
+            costs.
     \end{description}
+
+\item % Part 1c
+    This heuristic is not admissible because the cost function does
+    not depend on the length of the path but rather the line number.
+    Thus, a path along line 4, 5, or 6 that redirects twice has the same cost as a path along line 1, 2, or 3. Thus, it's possible for the
+    heuristic function to overestimate the cost of the path if the
+    stations along the path lie on an older (1, 2, or 3) line.
+    
+\item % Part 1d
+    This cost function is also not admissible because the driving
+    distance between stations is strictly greater than or equal
+    to the birds-flight distance.
+\end{enumerate}
+
+\section{Question 2 - Properties of Search Algorithms}
+\begin{description}
+    \item[Breadth-first search is a special case of uniform-cost search]
+        BFS is a special case of uniform-cost search when all operator
+        costs are the same (or unit cost).
+    \item[Depth-first search is a special case of best-first search]
+        DFS is not a special case of best-first search, because even
+        if the heuristic function for all nodes is equal, best-first search
+        is the same as breadth-first search.
+    \item[Uniform-cost search is a special case of A* search]
+        Uniform-cost search is a special case of A* search, because
+        A* search uses both the cost-so-far and the cost-to-go(heuristic function).
+        Thus, if the cost that the heuristic function produces for all nodes
+        is equal, then the only differing factor will be the "cost-so-far."
+\end{description}
+
+\section{Question 3 - Optimization}
+
 \end{document}
